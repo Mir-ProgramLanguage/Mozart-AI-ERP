@@ -3,7 +3,10 @@
 <p align="center">
   <strong>AI原生企业系统 - 打破传统ERP的一切概念</strong>
 </p>
-
+<p align="center">
+  <img src="https://p26-dreamina-sign.byteimg.com/tos-cn-i-tb4s082cfz/33ef5236b6a74a49bd17d69e4e25de10~tplv-tb4s082cfz-aigc_resize:1080:1080.webp?lk3s=7c3bb0db&x-expires=1774224000&x-signature=n7aQjkWzubOm7zSK%2FYSSRV1RaZA%3D&format=.webp" alt="MOZART AI ERP">
+ </p> 
+<p> 正在开发... </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/Vue-3.4+-green.svg" alt="Vue">
