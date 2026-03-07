@@ -6,6 +6,8 @@
 
 from app.database import engine, Base
 from app.models.contribution import Actor, Event, Reward, Task, ActorInteraction
+from app.models.user import User, Token
+from app.models.notification import Notification
 
 
 def init_db():

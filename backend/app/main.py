@@ -19,7 +19,7 @@ app = FastAPI(
 async def startup_event():
     """应用启动时初始化数据库"""
     Base.metadata.create_all(bind=engine)
-    print("✓ 数据库初始化完成")
+    print("[OK] Database initialized")
 
 
 # 配置CORS
@@ -49,13 +49,37 @@ async def health_check():
 
 
 # 注册路由
-from app.api.v1 import ai_core, contributions
+from app.api.v1 import ai_core, contributions, actors, tasks, search, unified, auth, ocr, notifications, export
+
+# 认证路由
+app.include_router(auth.router, prefix="/api/v1", tags=["认证"])
+
+# OCR识别路由
+app.include_router(ocr.router, prefix="/api/v1", tags=["OCR识别"])
+
+# 通知系统路由
+app.include_router(notifications.router, prefix="/api/v1", tags=["通知系统"])
 
 # 核心AI路由 - 所有交互都通过这里
 app.include_router(ai_core.router, prefix="/api/v1", tags=["AI中枢"])
 
 # 贡献系统路由
 app.include_router(contributions.router, prefix="/api/v1", tags=["贡献系统"])
+
+# Actor 管理路由
+app.include_router(actors.router, prefix="/api/v1", tags=["Actor管理"])
+
+# 任务管理路由
+app.include_router(tasks.router, prefix="/api/v1", tags=["任务管理"])
+
+# 语义搜索路由
+app.include_router(search.router, prefix="/api/v1", tags=["语义搜索"])
+
+# 统一接口路由
+app.include_router(unified.router, prefix="/api/v1", tags=["统一接口"])
+
+# 数据导出路由
+app.include_router(export.router, prefix="/api/v1", tags=["数据导出"])
 
 
 if __name__ == "__main__":

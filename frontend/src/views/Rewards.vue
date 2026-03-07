@@ -36,6 +36,14 @@
 
     <!-- 回报历史 -->
     <t-card title="回报记录" :bordered="false" style="margin-top: 24px;">
+      <template #actions>
+        <t-dropdown :options="exportOptions" @click="handleExport">
+          <t-button variant="outline">
+            <template #icon><t-icon name="download" /></template>
+            导出
+          </t-button>
+        </t-dropdown>
+      </template>
       <t-tabs v-model="activeTab">
         <t-tab-panel value="all" label="全部">
           <RewardList :rewards="allRewards" />
@@ -86,6 +94,20 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
+import { exportRewards } from '@/api'
+
+// 导出选项
+const exportOptions = [
+  { content: '导出为 CSV', value: 'csv' },
+  { content: '导出为 Excel', value: 'excel' },
+  { content: '导出为 JSON', value: 'json' }
+]
+
+const handleExport = (data: { value: string }) => {
+  const format = data.value as 'csv' | 'excel' | 'json'
+  exportRewards(format, { status: activeTab.value === 'all' ? undefined : activeTab.value })
+  MessagePlugin.success('正在导出数据...')
+}
 
 interface Reward {
   id: string

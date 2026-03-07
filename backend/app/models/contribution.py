@@ -4,7 +4,7 @@
 整合能力图谱、贡献评估、回报系统
 """
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, JSON, DECIMAL
+from sqlalchemy import Column, String, Integer, Float, DateTime, JSON, DECIMAL, Text
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.sql import func
 from datetime import datetime
@@ -32,6 +32,7 @@ class Actor(Base):
     """
     
     __tablename__ = "actors"
+    __table_args__ = {'extend_existing': True}
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     display_name = Column(String(50), unique=True, nullable=False)  # 匿名代号
@@ -71,7 +72,7 @@ class Actor(Base):
     reputation_score = Column(DECIMAL(3, 2), default=0.5)  # 声誉分数
     
     # 工作状态
-    current_tasks = Column(ARRAY(UUID(as_uuid=True)), default=list)
+    current_tasks = Column(JSON, default=list)  # 当前任务ID列表
     availability = Column(DECIMAL(3, 2), default=1.0)  # 可投入度
     
     # 时间戳
@@ -114,6 +115,7 @@ class Event(Base):
     """
     
     __tablename__ = "events"
+    __table_args__ = {'extend_existing': True}
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     actor_id = Column(UUID(as_uuid=True), nullable=False, index=True)
@@ -140,9 +142,9 @@ class Event(Base):
     value_calculation = Column(JSON, default=dict)  # 计算过程
     
     # 关联
-    related_events = Column(ARRAY(UUID(as_uuid=True)), default=list)
-    related_tasks = Column(ARRAY(UUID(as_uuid=True)), default=list)
-    beneficiaries = Column(ARRAY(UUID(as_uuid=True)), default=list)  # 受益方
+    related_events = Column(JSON, default=list)  # 使用JSON兼容SQLite
+    related_tasks = Column(JSON, default=list)
+    beneficiaries = Column(JSON, default=list)  # 受益方
     
     # 时间
     created_at = Column(DateTime, server_default=func.now(), index=True)
@@ -176,6 +178,7 @@ class Reward(Base):
     """
     
     __tablename__ = "rewards"
+    __table_args__ = {'extend_existing': True}
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     actor_id = Column(UUID(as_uuid=True), nullable=False, index=True)
@@ -219,6 +222,7 @@ class Task(Base):
     """
     
     __tablename__ = "tasks"
+    __table_args__ = {'extend_existing': True}
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
@@ -228,11 +232,11 @@ class Task(Base):
     priority = Column(Integer, default=50)  # 优先级 0-100
     
     # 分配
-    assigned_to = Column(ARRAY(UUID(as_uuid=True)), default=list)  # 可能多人
+    assigned_to = Column(JSON, default=list)  # 可能多人，使用JSON兼容SQLite
     status = Column(String(20), default="pending", index=True)
     
     # 关联
-    related_events = Column(ARRAY(UUID(as_uuid=True)), default=list)
+    related_events = Column(JSON, default=list)
     
     # 时间
     created_at = Column(DateTime, server_default=func.now())
@@ -261,6 +265,7 @@ class ActorInteraction(Base):
     """
     
     __tablename__ = "actor_interactions"
+    __table_args__ = {'extend_existing': True}
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
@@ -286,7 +291,7 @@ class ActorInteraction(Base):
     # AI处理结果
     ai_response = Column(Text)  # AI的回复
     task_id = Column(UUID(as_uuid=True))  # 如果产生了任务
-    events_created = Column(ARRAY(UUID(as_uuid=True)), default=list)  # 产生的事件
+    events_created = Column(JSON, default=list)  # 产生的事件，使用JSON兼容SQLite
     
     # 状态
     status = Column(String(20), default="pending", index=True)  # pending/completed/failed

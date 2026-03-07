@@ -19,7 +19,6 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.services.ai_service import AIService
 from app.services.central_ai_service import CentralAIService
-from app.services.ocr_service import OCRService
 from app.models.contribution import Actor, ActorType
 
 router = APIRouter()
@@ -66,8 +65,6 @@ async def universal_input(
     text: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
-    ai_service: AIService = Depends(),
-    ocr_service: OCRService = Depends(),
 ):
     """
     统一输入接口 - 原生AI的核心
@@ -75,7 +72,6 @@ async def universal_input(
     用户可以：
     - 发送文字："今天采购了20斤土豆35元一斤供应商张三"
     - 上传图片：发票、采购单、收据
-    - 语音输入：（未来支持）
 
     AI会：
     1. 理解用户意图（采购？销售？查询？）
@@ -102,22 +98,53 @@ async def universal_input(
                 "unit": "斤",
                 "unit_price": 35,
                 "total_amount": 700,
-                "supplier": "张三",
-                "date": "2026-03-06"
+                "supplier": "张三"
             }
         },
         "message": "已记录采购：土豆 20斤，共700元"
     }
     """
-    # TODO: 实现逻辑
-    pass
+    from app.ai import get_ai_core
+    
+    # TODO: 处理文件上传 (OCR)
+    
+    if not text:
+        raise HTTPException(status_code=400, detail="请提供文本内容")
+    
+    # 使用默认 Actor（演示用）
+    actor_id = "00000000-0000-0000-0000-000000000001"
+    
+    # 获取或创建默认 Actor
+    from app.services.actor_service import ActorService
+    actor_service = ActorService(db)
+    default_actor = actor_service.get_actor_by_name("System")
+    if not default_actor:
+        default_actor = actor_service.create_actor(
+            display_name="System",
+            actor_type="human"
+        )
+    actor_id = str(default_actor.id)
+    
+    # 调用 AI Core 处理
+    ai_core = get_ai_core(db)
+    result = await ai_core.process_input(
+        actor_id=actor_id,
+        content=text
+    )
+    
+    return {
+        "status": "success",
+        "understood": result["understood"],
+        "contribution": result["contribution"],
+        "tasks_created": result["tasks_created"],
+        "message": result["message"]
+    }
 
 
 @router.post("/query")
 async def natural_language_query(
     query: str,
     db: Session = Depends(get_db),
-    ai_service: AIService = Depends(),
 ):
     """
     自然语言查询接口
@@ -126,7 +153,6 @@ async def natural_language_query(
     - "本月采购了多少钱？"
     - "土豆的平均价格是多少？"
     - "上周营业额比这周怎么样？"
-    - "张三供应商一共给我们供货多少次？"
 
     AI会：
     1. 理解查询意图
@@ -135,10 +161,7 @@ async def natural_language_query(
     4. 用自然语言回答
 
     示例：
-    POST /api/v1/query
-    {
-        "query": "本月采购了多少钱？"
-    }
+    POST /api/v1/query?query=本月采购了多少钱？
 
     响应：
     {
@@ -147,15 +170,15 @@ async def natural_language_query(
             "total_amount": 15230,
             "count": 23,
             "period": "2026-03"
-        },
-        "visualization": {
-            "type": "bar_chart",
-            "data": [...]
         }
     }
     """
-    # TODO: 实现逻辑
-    pass
+    from app.ai import get_ai_core
+    
+    ai_core = get_ai_core(db)
+    result = await ai_core.answer_query(query)
+    
+    return result
 
 
 @router.get("/events")

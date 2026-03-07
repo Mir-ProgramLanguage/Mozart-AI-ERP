@@ -23,6 +23,7 @@ class BusinessEvent(Base):
     所有业务活动都记录为事件，AI负责理解和分类
     """
     __tablename__ = "business_events"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -62,6 +63,7 @@ class AIQueryHistory(Base):
     记录用户的自然语言查询和AI的回答
     """
     __tablename__ = "ai_query_history"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, index=True)
@@ -77,17 +79,4 @@ class AIQueryHistory(Base):
     # 性能指标
     response_time_ms = Column(Integer, comment="响应时间（毫秒）")
 
-    created_at = Column(DateTime, server_default=func.now())
-
-
-class User(Base):
-    """用户表 - 保持简单"""
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
-    full_name = Column(String(100))
-    is_active = Column(Integer, default=1)
     created_at = Column(DateTime, server_default=func.now())
